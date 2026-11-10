@@ -1,0 +1,11 @@
+{
+  "name": "little-break",
+  "owner": { "name": "Joey" },
+  "plugins": [
+    {
+      "name": "little-break",
+      "source": "./",
+      "description": "Little Break：你交给 Claude 一个任务时，它会问你要不要在等待的间隙玩一会小游戏。"
+    }
+  ]
+}
