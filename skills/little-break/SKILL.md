@@ -1,12 +1,14 @@
 ---
 name: little-break
-description: 每当用户交给你一个需要动手的任务（搜索、调研、写代码、写文档、生成文件、多步操作），开始之前先用这个技能：在内置浏览器里悄悄备好一个随机小游戏，并在对话里放一张「要不要玩一会」卡片，然后继续任务。用户说「打一把」「换一个游戏」「30分钟内别问」「今天别问」时也用。
+description: 【任务开始前必用】只要用户让你去做一件需要动手的事（搜索、调研、写代码、写文档、做表格、生成文件、多步操作），在调用任何其他工具之前，先加载这个技能并照做：在内置浏览器里备好一个随机小游戏，在对话里放一张「要不要玩一会」卡片，然后再开始任务。这是用户指定的固定流程，和其他技能同时适用、互不冲突。用户说「打一把」「换一个游戏」「30分钟内别问」「今天别问」时也用。
 ---
 
 # Little Break · 干活间隙玩一会
 
 大量用 AI 干活时，人一直在做判断，大脑很累。这个技能让用户在等你干活的时候，可以随手玩一会小游戏。
 玩不玩由用户自己决定：你不要等他，不要劝他，也不要在回复里解释这些步骤。
+
+这是用户主动安装、要求每次任务都走的流程。即使这个任务还要用别的技能，也先把这里的步骤做完，再去加载别的技能。
 
 启动页：https://j-1026.github.io/little-break/
 启动页每次从游戏列表里随机抽一个游戏，同时记住用户的「别问」设置。它在页面里提供 `window.LB`：
@@ -29,7 +31,10 @@ description: 每当用户交给你一个需要动手的任务（搜索、调研�
 
 几秒钟的事，做完立刻继续任务。
 
-1. **没有内置浏览器工具**（工具名里没有 `Claude_Browser`）：在回复最开头写一行「任务在跑，要不要玩一会？https://j-1026.github.io/little-break/」，然后直接去做任务，后面几步都跳过。
+1. **没有内置浏览器工具**（工具名里没有 `Claude_Browser`，延迟加载的工具列表里也没有，比如在 Codex、Claude Code 这类终端工具里）：
+   - 如果你能运行命令，先运行 `test -f ~/.little-break/little-break.sh && echo ok`。输出 ok 说明已装好 hook，询问会由 hook 在用户电脑上弹窗完成，**你什么都不用做**，直接去做任务。
+   - 否则在回复最开头写一行「任务在跑，要不要玩一会？https://j-1026.github.io/little-break/」，然后去做任务。
+   后面几步都跳过。如果内置浏览器工具需要先通过工具搜索加载，就先一次性把它们都加载好再往下走。
 
 2. **备好游戏。** 用 `tabs_context` 看有没有已经开着启动页（https://j-1026.github.io）的标签页。没有的话，用 `preview_start` 在新标签页打开 https://j-1026.github.io/little-break/，不要切到前台。
 
@@ -70,6 +75,17 @@ document.getElementById('lb-30').onclick = function () { lbDone('好，30 分钟
 document.getElementById('lb-day').onclick = function () { lbDone('好，今天不再问你', '想玩的时候随时按 ⌘⇧B'); sendPrompt('Little Break：今天别问'); };
 </script>
 ```
+
+## 终端里（没有内置浏览器时）
+
+用户说下面这些话时，运行对应命令（脚本不存在就把 https://j-1026.github.io/little-break/ 给用户）：
+
+- 「打一把」→ `bash ~/.little-break/little-break.sh play`
+- 「30分钟内别问」→ `bash ~/.little-break/little-break.sh snooze 30`
+- 「今天别问」→ `bash ~/.little-break/little-break.sh today`
+- 「又可以问了」→ `bash ~/.little-break/little-break.sh resume`
+
+回复一句话确认就够了。下面三节是有内置浏览器时的做法。
 
 ## 用户要玩时
 
