@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Little Break</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0f1115; overflow: hidden; }
+  body { font: 13px/1.4 -apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans SC", sans-serif; color: #e8eaee; }
+  #game { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; display: block; background: #0f1115; }
+  #bar {
+    position: fixed; top: 10px; right: 10px; z-index: 2; display: flex; gap: 6px; align-items: center;
+    padding: 4px 6px 4px 10px; border-radius: 999px; background: rgba(15,17,21,.55);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); opacity: .35; transition: opacity .2s;
+  }
+  #bar:hover { opacity: 1; }
+  #bar button {
+    font: inherit; color: inherit; background: rgba(255,255,255,.12); border: 0; border-radius: 999px;
+    padding: 3px 10px; cursor: pointer;
+  }
+  #bar button:hover { background: rgba(255,255,255,.22); }
+  #empty { position: fixed; inset: 0; display: none; place-items: center; text-align: center; color: #9aa1ad; }
+</style>
+</head>
+<body>
+<iframe id="game" title="Little Break game" allow="autoplay; fullscreen; gamepad; accelerometer; gyroscope" allowfullscreen></iframe>
+<div id="bar"><span id="name"></span><button id="next" title="随机换一个游戏">换一个</button></div>
+<div id="empty">游戏列表是空的，在 games.json 里加一个游戏吧。</div>
+<script>
+(function () {
+  var FALLBACK = [{ name: "守城小国王", url: "https://little-king-git-war-mode-sheji.vercel.app/" }];
+  var KEY_SNOOZE = "lb_snooze_until";
+  var KEY_LAST = "lb_last_game";
+
+  function store(k, v) {
+    try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, String(v)); } catch (e) { return null; }
+  }
+
+  var games = FALLBACK;
+  var current = null;
+
+  function pick() {
+    if (!games.length) return null;
+    if (games.length === 1) return games[0];
+    var last = store(KEY_LAST);
+    var pool = games.filter(function (g) { return g.url !== last; });
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  function load(game) {
+    current = game;
+    if (!game) { document.getElementById("empty").style.display = "grid"; return; }
+    store(KEY_LAST, game.url);
+    document.getElementById("game").src = game.url;
+    document.getElementById("name").textContent = game.name;
+    document.title = "Little Break · " + game.name;
+  }
+
+  function endOfToday() {
+    var d = new Date(); d.setHours(24, 0, 0, 0); return d.getTime();
+  }
+
+  window.LB = {
+    status: function () {
+      var until = Number(store(KEY_SNOOZE)) || 0;
+      return { snoozed: Date.now() < until, until: until, game: current && current.name, games: games.map(function (g) { return g.name; }) };
+    },
+    snooze: function (minutes) {
+      var until = Date.now() + Math.max(1, Number(minutes) || 30) * 60000;
+      store(KEY_SNOOZE, until); return this.status();
+    },
+    snoozeToday: function () { store(KEY_SNOOZE, endOfToday()); return this.status(); },
+    clearSnooze: function () { store(KEY_SNOOZE, null); return this.status(); },
+    next: function () { load(pick()); return this.status(); }
+  };
+
+  document.getElementById("next").onclick = function () { window.LB.next(); };
+
+  fetch("games.json", { cache: "no-store" })
+    .then(function (r) { return r.ok ? r.json() : FALLBACK; })
+    .then(function (list) { if (Array.isArray(list)) games = list.filter(function (g) { return g && g.url; }); })
+    .catch(function () {})
+    .then(function () { load(pick()); });
+})();
+</script>
+</body>
+</html>
