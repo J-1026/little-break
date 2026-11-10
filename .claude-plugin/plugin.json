@@ -1,6 +1,8 @@
 {
   "name": "little-break",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Little Break：你交给 Claude 一个任务时，它会问你要不要在等待的间隙玩一会小游戏。",
-  "author": { "name": "Joey" }
+  "author": {
+    "name": "Joey"
+  }
 }
