@@ -24,20 +24,34 @@ Little Break 是一个 Claude 技能。你给 Claude 布置一个任务，它开
 ### 安装
 
 **Claude 桌面版 / 网页版**
-1. 在 [Releases](https://github.com/J-1026/little-break/releases/latest) 下载 `little-break-skill.zip`。
-2. 打开 Claude，进入 Customize › Skills，点「+」→「Create skill」→「Upload a skill」，上传这个 ZIP。
-3. 确认技能是开着的，然后开一个新对话，交给 Claude 一个任务试试。
+
+在 Claude 对话里粘贴这一句，Claude 会弹出「保存技能」卡片，点保存即可：
+
+```
+帮我安装这个技能：https://github.com/J-1026/little-break
+```
+
+没有弹卡片的话，下载 [little-break-skill.zip](https://github.com/J-1026/little-break/releases/latest/download/little-break-skill.zip)，在 Customize › Skills 里点「+」→「Create skill」→「Upload a skill」上传。
 
 > 卡片和「备好游戏」需要 Claude 桌面版的内置浏览器。在网页版或手机上，Claude 会改成在回复开头放一行游戏链接。
 
-**Claude Code**
+**Codex / Claude Code（macOS、Linux）**
+
+在终端里粘贴这一行：
+
+```
+curl -fsSL https://j-1026.github.io/little-break/install.sh | bash
+```
+
+它会装好技能，并加一个 hook：你每次发任务，电脑上会弹出一个小窗口问「要不要玩一会？」，按钮是「来一局 / 30 分钟内别问 / 今天别问」。不靠模型判断，每次都会问（同一段时间内最多 5 分钟问一次，太短的消息比如「好的」不会问）。装完重启 Codex / Claude Code；Codex 如果提示有新 hook，输入 `/hooks` 信任它。
+
+Claude Code 也可以用插件方式装：
 ```
 /plugin marketplace add J-1026/little-break
 /plugin install little-break@little-break
 ```
-Claude Code 里没有内置浏览器，所以会改成给你一行游戏链接。
 
-### 可以对 Claude 说的话
+### 可以对 Claude / Codex 说的话
 
 | 说 | 效果 |
 | --- | --- |
@@ -65,6 +79,9 @@ Claude Code 里没有内置浏览器，所以会改成给你一行游戏链接�
 index.html                    启动页：随机抽游戏、记住「别问」设置（GitHub Pages 托管）
 games.json                    游戏列表
 skills/little-break/SKILL.md  技能本体
+scripts/little-break.sh       Codex / Claude Code 用的弹窗脚本
+install.sh                    一行命令安装
+hooks/hooks.json              Claude Code 插件的 hook
 .claude-plugin/               Claude Code 插件配置
 ```
 
@@ -88,18 +105,32 @@ Little Break is a Claude skill. When you hand Claude a task and it starts workin
 ### Install
 
 **Claude desktop / web**
-1. Download `little-break-skill.zip` from [Releases](https://github.com/J-1026/little-break/releases/latest).
-2. In Claude, go to Customize › Skills, click "+" → "Create skill" → "Upload a skill", and upload the ZIP.
-3. Make sure the skill is on, start a new chat, and give Claude a task.
+
+Paste this into a Claude chat. Claude shows a "save skill" card; click save:
+
+```
+Install this skill for me: https://github.com/J-1026/little-break
+```
+
+If no card appears, download [little-break-skill.zip](https://github.com/J-1026/little-break/releases/latest/download/little-break-skill.zip) and upload it under Customize › Skills → "+" → "Create skill" → "Upload a skill".
 
 > The card and preloading need the built-in browser of the Claude desktop app. On the web or mobile, Claude falls back to a one-line game link.
 
-**Claude Code**
+**Codex / Claude Code (macOS, Linux)**
+
+Paste this into your terminal:
+
+```
+curl -fsSL https://j-1026.github.io/little-break/install.sh | bash
+```
+
+It installs the skill plus a hook: every time you send a task, a small window pops up asking "want to play for a bit?" with "Play / Not for 30 min / Not today". It doesn't rely on the model, so it asks every time (at most once every 5 minutes; very short messages like "ok" are skipped). Restart Codex / Claude Code afterwards; if Codex says there's a new hook to review, run `/hooks` and trust it.
+
+Claude Code can also install it as a plugin:
 ```
 /plugin marketplace add J-1026/little-break
 /plugin install little-break@little-break
 ```
-Claude Code has no built-in browser, so you'll get a game link instead.
 
 ### Things you can say
 
