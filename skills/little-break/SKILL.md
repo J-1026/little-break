@@ -42,37 +42,49 @@ description: 【任务开始前必用】只要用户让你去做一件需要动�
    - 如果 `snoozed` 是 true：**不放卡片，什么都不说**，直接去做任务。
    - 否则记下 `game`，也就是这次抽到的游戏名。
 
-4. **放卡片。** 用内联可视化工具（例如 `show_widget`；如果它要求先调用一次说明工具，比如 `read_me`，就静默调用，不要提）把下面的 HTML 原样画出来，title 用 `little_break_card`，并把里面的 `{{GAME}}` 换成上一步拿到的游戏名。没有可视化工具的话，就在回复开头写一行：「任务在跑，要不要玩一会？这次是 {{GAME}}，按 ⌘⇧B 开玩（Windows 是 Ctrl+Shift+B）。」
+4. **放卡片。** 用内联可视化工具（例如 `show_widget`；如果它要求先调用一次说明工具，比如 `read_me`，就静默调用，不要提）把下面的 HTML 原样画出来，title 用 `little_break_card`，并把里面的 `{{GAME}}` 换成上一步拿到的游戏名。没有可视化工具的话，就在回复开头写一行：「任务在跑，要不要玩一会？这次是 {{GAME}}。在 Claude 里玩按 ⌘⇧B（Windows 是 Ctrl+Shift+B），在浏览器里玩打开 https://j-1026.github.io/little-break/」
 
 5. **继续做用户交给你的任务。**
 
 卡片 HTML：
 
 ```html
-<h2 class="sr-only">A card offering a quick game while Claude works.</h2>
+<h2 class="sr-only">A card offering a quick game while Claude works, with options to play inside Claude or in the browser.</h2>
 <div style="background: var(--surface-2); border: 0.5px solid var(--border); border-radius: 12px; padding: 14px 16px;">
   <div style="display: flex; align-items: center; gap: 14px;">
     <div style="flex: none; width: 40px; height: 40px; border-radius: var(--radius); background: var(--bg-accent); display: flex; align-items: center; justify-content: center;"><i class="ti ti-device-gamepad-2" style="font-size: 20px; color: var(--text-accent);" aria-hidden="true"></i></div>
     <div style="flex: 1; min-width: 0;">
       <p id="lb-t" style="margin: 0; font-weight: 500; font-size: 15px;">任务在跑，要不要玩一会？</p>
-      <p id="lb-s" style="margin: 0; font-size: 13px; color: var(--text-secondary);">这次是{{GAME}}，已在旁边备好，按 <span style="font-family: var(--font-mono); font-size: 12px; padding: 1px 6px; border: 0.5px solid var(--border-strong); border-radius: 4px;">⌘ ⇧ B</span> 开玩</p>
+      <p id="lb-s" style="margin: 0; font-size: 13px; color: var(--text-secondary);">这次是{{GAME}}</p>
     </div>
   </div>
-  <div id="lb-a" style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px;">
+  <div id="lb-a" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
+    <button id="lb-in" style="background: var(--fill-accent, #378ADD); color: var(--on-accent, #fff); border-color: transparent;">在 Claude 里玩</button>
+    <button id="lb-out">在浏览器里玩 ↗</button>
     <button id="lb-no">不用了</button>
-    <button id="lb-30">30 分钟内别问</button>
-    <button id="lb-day">今天别问</button>
   </div>
+  <p id="lb-m" style="margin: 10px 0 0; font-size: 12px; color: var(--text-muted);">
+    <a href="#" id="lb-30" style="color: inherit;">30 分钟内别问</a> · <a href="#" id="lb-day" style="color: inherit;">今天别问</a>
+  </p>
 </div>
 <script>
+var LB_URL = 'https://j-1026.github.io/little-break/';
 function lbDone(t, s) {
   document.getElementById('lb-a').style.display = 'none';
+  document.getElementById('lb-m').style.display = 'none';
   document.getElementById('lb-t').textContent = t;
-  document.getElementById('lb-s').textContent = s;
+  document.getElementById('lb-s').innerHTML = s;
 }
-document.getElementById('lb-no').onclick = function () { lbDone('好，那就专心等结果', '想玩的时候随时按 ⌘⇧B'); };
-document.getElementById('lb-30').onclick = function () { lbDone('好，30 分钟内不再问你', '想玩的时候随时按 ⌘⇧B'); sendPrompt('Little Break：30分钟内别问'); };
-document.getElementById('lb-day').onclick = function () { lbDone('好，今天不再问你', '想玩的时候随时按 ⌘⇧B'); sendPrompt('Little Break：今天别问'); };
+document.getElementById('lb-in').onclick = function () {
+  lbDone('游戏已在 Claude 右侧备好', '按 <span style="font-family: var(--font-mono); font-size: 12px; padding: 1px 6px; border: 0.5px solid var(--border-strong); border-radius: 4px;">⌘ ⇧ B</span> 打开，Windows 是 Ctrl+Shift+B');
+};
+document.getElementById('lb-out').onclick = function () {
+  if (typeof openLink === 'function') openLink(LB_URL); else window.open(LB_URL, '_blank');
+  lbDone('玩得开心', '结果好了会在这里等你');
+};
+document.getElementById('lb-no').onclick = function () { lbDone('好，那就专心等结果', '想玩的时候随时说「打一把」'); };
+document.getElementById('lb-30').onclick = function (e) { e.preventDefault(); lbDone('好，30 分钟内不再问你', ''); sendPrompt('Little Break：30分钟内别问'); };
+document.getElementById('lb-day').onclick = function (e) { e.preventDefault(); lbDone('好，今天不再问你', ''); sendPrompt('Little Break：今天别问'); };
 </script>
 ```
 
