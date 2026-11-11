@@ -17,7 +17,7 @@ Little Break 是一个 Claude 技能。你给 Claude 布置一个任务，它开
 ### 它做什么
 
 - **每个任务开始时问一次**：只在真正需要动手的任务前出现，闲聊不会打扰你。
-- **游戏是随机的**：每次从游戏列表里随机抽一个。现在列表里只有「守城小国王」，以后会换成或加入更多自己做的小游戏。
+- **游戏是随机的**：每次从游戏列表里随机抽一个。现在列表里有两个自己做的篮球小游戏：Swish（单人投篮机，追求完美空刷）和 Halftime（桌面对战篮球机，你对你的 agent），以后会加入更多。
 - **不打扰机制**：卡片上可以选「30 分钟内别问」或「今天别问」。这个设置会被记住，换一个对话也有效。
 - **玩的地方就在 Claude 里**：游戏在 Claude 桌面版的内置浏览器里打开，按 ⌘⇧B（Windows 是 Ctrl+Shift+B）就能调出来。
 
@@ -67,7 +67,8 @@ Claude Code 也可以用插件方式装：
 
 ```json
 [
-  { "name": "守城小国王", "url": "https://little-king-git-war-mode-sheji.vercel.app/" }
+  { "name": "Swish", "url": "swish/" },
+  { "name": "Halftime", "url": "halftime/" }
 ]
 ```
 
@@ -78,6 +79,8 @@ Claude Code 也可以用插件方式装：
 ```
 index.html                    启动页：随机抽游戏、记住「别问」设置（GitHub Pages 托管）
 games.json                    游戏列表
+swish/                        Swish 投篮机
+halftime/                     Halftime 对战篮球机
 skills/little-break/SKILL.md  技能本体
 scripts/little-break.sh       Codex / Claude Code 用的弹窗脚本
 install.sh                    一行命令安装
@@ -98,7 +101,7 @@ Little Break is a Claude skill. When you hand Claude a task and it starts workin
 ### What it does
 
 - **Asks once per task**: only before real work, never during small talk.
-- **Random game**: picks one from the game list each time. Today the list has one game (守城小国王 · Little King); more of my own games will rotate in.
+- **Random game**: picks one from the game list each time. Today it has two of my own basketball games: Swish (a single-player shooting machine, chasing the perfect swish) and Halftime (a tabletop dome battle, you vs your agent). More will rotate in.
 - **Don't-disturb options**: the card offers "not for 30 minutes" and "not today". The setting is remembered across conversations.
 - **Plays inside Claude**: the game opens in the Claude desktop app's built-in browser. Press ⌘⇧B (Ctrl+Shift+B on Windows) to bring it up.
 
