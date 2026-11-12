@@ -343,8 +343,16 @@ function hit(b,qx,qy,qz,rad,e,f,kind,ev){
   let nx=b.x-qx,ny=b.y-qy,nz=b.z-qz;const d=Math.hypot(nx,ny,nz);if(d>=rad||d<1e-6)return false;
   nx/=d;ny/=d;nz/=d;const pen=rad-d;b.x+=nx*pen;b.y+=ny*pen;b.z+=nz*pen;
   const vn=b.vx*nx+b.vy*ny+b.vz*nz;
-  if(vn<0){const tx=b.vx-vn*nx,ty=b.vy-vn*ny,tz=b.vz-vn*nz;
-    b.vx=tx*f-vn*e*nx;b.vy=ty*f-vn*e*ny;b.vz=tz*f-vn*e*nz;ev(kind,-vn,qx,qz);}
+  if(vn<0){const imp=-vn;
+    // a soft touch (ball resting or rolling on the rim) should roll, not hop and lose all its speed every step
+    if(kind==='rim'||kind==='board'){if(imp<0.9){e=0.12;f=0.997;}}
+    const tx=b.vx-vn*nx,ty=b.vy-vn*ny,tz=b.vz-vn*nz;
+    b.vx=tx*f-vn*e*nx;b.vy=ty*f-vn*e*ny;b.vz=tz*f-vn*e*nz;
+    // a real rim is never perfectly even: a hard knock nudges the ball a little sideways, so it rolls around the rim instead of ping-ponging in one plane
+    if(kind==='rim'&&imp>=0.9&&!b.det)b.vz+=(Math.random()-0.5)*0.24*Math.min(imp,7);
+    // the contact turns the spin towards rolling
+    if((kind==='rim'||kind==='board')&&imp>=0.9)b.spin=(b.spin===undefined?0:b.spin)*0.35+(-b.vx/BR)*0.65;
+    if(imp>=0.9||kind!=='rim')ev(kind,imp,qx,qz);}
   return true;}
 function stepBall(b,dt,ev){
   b.vy-=G*dt;const py=b.y;b.x+=b.vx*dt;b.y+=b.vy*dt;b.z+=b.vz*dt;
@@ -369,7 +377,7 @@ function stepBall(b,dt,ev){
     else{b.vy=0;const k=Math.exp(-1.6*dt);b.vx*=k;b.vz*=k;if(Math.hypot(b.vx,b.vz)<0.08){b.vx=0;b.vz=0;b.state='rest';}}}
 }
 function simShot(p,z){const v=powerToV(p);const vx=v*Math.cos(TH);const T=(RIMX-LAUNCH[0])/vx;
-  const o={x:LAUNCH[0],y:LAUNCH[1],z:0,vx,vy:v*Math.sin(TH),vz:(z||0)/T,rot:0,state:'fly'};let r=null,touch=false,t=0;
+  const o={x:LAUNCH[0],y:LAUNCH[1],z:0,vx,vy:v*Math.sin(TH),vz:(z||0)/T,rot:0,state:'fly',det:true};let r=null,touch=false,t=0;
   while(o.state==='fly'&&t<7&&o.x<14){stepBall(o,1/480,(k)=>{if(k==='score')r=touch?'in':'swish';else if(k!=='floor')touch=true;});t+=1/480;}
   return r;}
 function scoreWindow(){const res=[];for(let i=0;i<=400;i++)res.push(simShot(i/400,0));
@@ -440,7 +448,7 @@ function onEvent(b){return (kind,v,qx,qz)=>{
     streakUp();popVerdict(r);save();hud();return;}
   if(kind!=='floor')b.trailStop=true;
   if(kind==='rim'){if(!b.scored){if(S.clock-(b.lastRim===undefined?-9:b.lastRim)>0.12)b.rimHits++;b.lastRim=S.clock;if(!b.rimSide)b.rimSide=sideOf(qx,qz);}
-    WOB.rv-=Math.min(6,v)*0.09;S.shake=Math.min(1,S.shake+Math.min(1,v/7)*0.7);if(v>1.5)chips(qx,RIMY,qz,v);}
+    WOB.rv-=Math.min(6,v)*0.07;if(v>2.5)S.shake=Math.min(0.6,S.shake+Math.min(1,(v-2.5)/6)*0.35);if(v>1.5)chips(qx,RIMY,qz,v);}
   if(kind==='board'){if(!b.scored)b.board=true;WOB.bv+=Math.min(6,v)*0.05;}
   sfx(kind,v);
   if(kind==='floor')judgeMiss(b);};}
