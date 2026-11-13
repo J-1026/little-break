@@ -42,62 +42,89 @@ description: 【任务开始前必用】只要用户让你去做一件需要动�
    - 如果 `snoozed` 是 true：**不放卡片，什么都不说**，直接去做任务。
    - 否则记下 `game`，也就是这次抽到的游戏名。
 
-4. **放卡片。** 用内联可视化工具（例如 `show_widget`；如果它要求先调用一次说明工具，比如 `read_me`，就静默调用，不要提）把下面的 HTML 原样画出来，title 用 `little_break_card`，并把里面的 `{{GAME}}` 换成上一步拿到的游戏名。没有可视化工具的话，就在回复开头写一行：「任务在跑，要不要玩一会？这次是 {{GAME}}。在 Claude 里玩按 ⌘⇧B（Windows 是 Ctrl+Shift+B），在浏览器里玩打开 https://j-1026.github.io/little-break/」
+4. **放卡片。** 用内联可视化工具（例如 `show_widget`；如果它要求先调用一次说明工具，比如 `read_me`，就静默调用，不要提）把下面的 HTML 原样画出来，title 用 `little_break_card`，并把里面的 `{{GAME}}` 换成上一步拿到的游戏名。没有可视化工具的话，就在回复开头写一行：「任务在跑，要不要玩一会？这次是 {{GAME}}，点这里直接玩：https://j-1026.github.io/little-break/」
 
 5. **继续做用户交给你的任务。**
 
 卡片 HTML：
 
 ```html
-<h2 class="sr-only">A card offering a quick game while Claude works, with options to play inside Claude or in the browser.</h2>
+<h2 class="sr-only">A card offering a quick game while Claude works; one click starts the game right inside the card.</h2>
 <div style="background: var(--surface-2); border: 0.5px solid var(--border); border-radius: 12px; padding: 14px 16px;">
   <div style="display: flex; align-items: center; gap: 14px;">
     <div style="flex: none; width: 40px; height: 40px; border-radius: var(--radius); background: var(--bg-accent); display: flex; align-items: center; justify-content: center;"><i class="ti ti-device-gamepad-2" style="font-size: 20px; color: var(--text-accent);" aria-hidden="true"></i></div>
     <div style="flex: 1; min-width: 0;">
       <p id="lb-t" style="margin: 0; font-weight: 500; font-size: 15px;">任务在跑，要不要玩一会？</p>
-      <p id="lb-s" style="margin: 0; font-size: 13px; color: var(--text-secondary);">这次是{{GAME}}</p>
+      <p id="lb-s" style="margin: 0; font-size: 13px; color: var(--text-secondary);">这次是 {{GAME}}</p>
     </div>
   </div>
   <div id="lb-a" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
-    <button id="lb-in" style="background: var(--fill-accent, #378ADD); color: var(--on-accent, #fff); border-color: transparent;">在 Claude 里玩</button>
-    <button id="lb-out">在浏览器里玩 ↗</button>
+    <button id="lb-go" style="background: var(--fill-accent, #378ADD); color: var(--on-accent, #fff); border-color: transparent;"><i class="ti ti-player-play" style="font-size: 16px; vertical-align: -3px; margin-right: 4px;" aria-hidden="true"></i>立即开始玩</button>
+    <button id="lb-next">换一个</button>
     <button id="lb-no">不用了</button>
   </div>
+  <div id="lb-g"></div>
   <p id="lb-m" style="margin: 10px 0 0; font-size: 12px; color: var(--text-muted);">
-    <a href="#" id="lb-30" style="color: inherit;">30 分钟内别问</a> · <a href="#" id="lb-day" style="color: inherit;">今天别问</a>
+    <a href="#" id="lb-30" style="color: inherit;">30 分钟内别问</a> · <a href="#" id="lb-day" style="color: inherit;">今天别问</a> · <a href="#" id="lb-out" style="color: inherit;">在浏览器里玩 ↗</a>
   </p>
 </div>
 <script>
-var LB_URL = 'https://j-1026.github.io/little-break/';
-function lbDone(t, s) {
-  document.getElementById('lb-a').style.display = 'none';
-  document.getElementById('lb-m').style.display = 'none';
-  document.getElementById('lb-t').textContent = t;
-  document.getElementById('lb-s').innerHTML = s;
+var LB_PAGE = 'https://j-1026.github.io/little-break/';
+var LB_CDN = 'https://cdn.jsdelivr.net/gh/J-1026/little-break@main/';
+var LB_FALLBACK = [{ name: 'Swish', url: 'swish/' }, { name: 'Halftime', url: 'halftime/' }];
+var lbName = '{{GAME}}', lbList = null, lbPlaying = false;
+var $ = function (id) { return document.getElementById(id); };
+function lbGames() {
+  if (lbList) return Promise.resolve(lbList);
+  return fetch(LB_CDN + 'games.json').then(function (r) { return r.json(); })
+    .then(function (j) { lbList = Array.isArray(j) && j.length ? j : LB_FALLBACK; return lbList; })
+    .catch(function () { lbList = LB_FALLBACK; return lbList; });
 }
-document.getElementById('lb-in').onclick = function () {
-  lbDone('游戏已在 Claude 右侧备好', '按 <span style="font-family: var(--font-mono); font-size: 12px; padding: 1px 6px; border: 0.5px solid var(--border-strong); border-radius: 4px;">⌘ ⇧ B</span> 打开，Windows 是 Ctrl+Shift+B');
+function lbOpenPage() { if (typeof openLink === 'function') openLink(LB_PAGE); else window.open(LB_PAGE, '_blank'); }
+function lbQuiet(t, s) {
+  $('lb-a').style.display = 'none'; $('lb-m').style.display = 'none'; $('lb-g').innerHTML = '';
+  $('lb-t').textContent = t; $('lb-s').textContent = s;
+}
+function lbPlay(name) {
+  $('lb-go').textContent = '加载中…';
+  lbGames().then(function (list) {
+    var g = list.filter(function (x) { return x.name === name; })[0] || list[0];
+    return fetch(LB_CDN + g.url + 'index.html').then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .then(function (html) {
+        lbName = g.name; lbPlaying = true;
+        var f = document.createElement('iframe');
+        f.title = g.name; f.setAttribute('allow', 'autoplay; fullscreen; gamepad');
+        f.style.cssText = 'display: block; width: 100%; height: 560px; border: 0; border-radius: 8px; margin-top: 12px; background: #0f1115;';
+        f.srcdoc = html;
+        $('lb-g').innerHTML = ''; $('lb-g').appendChild(f);
+        $('lb-t').textContent = '正在玩 ' + g.name;
+        $('lb-s').textContent = 'Claude 照常干活，结果好了在下面';
+        $('lb-go').textContent = '收起';
+      });
+  }).catch(function () {
+    $('lb-go').textContent = '立即开始玩';
+    $('lb-s').textContent = '这里加载不出来，已在浏览器里打开';
+    lbOpenPage();
+  });
+}
+$('lb-go').onclick = function () {
+  if (lbPlaying) { lbPlaying = false; $('lb-g').innerHTML = ''; $('lb-t').textContent = '先玩到这'; $('lb-s').textContent = '想接着玩再点一下'; this.textContent = '接着玩'; return; }
+  lbPlay(lbName);
 };
-document.getElementById('lb-out').onclick = function () {
-  if (typeof openLink === 'function') openLink(LB_URL); else window.open(LB_URL, '_blank');
-  lbDone('玩得开心', '结果好了会在这里等你');
+$('lb-next').onclick = function () {
+  lbGames().then(function (list) {
+    var pool = list.filter(function (x) { return x.name !== lbName; });
+    var g = pool.length ? pool[Math.floor(Math.random() * pool.length)] : list[0];
+    lbName = g.name;
+    if (lbPlaying) lbPlay(lbName); else $('lb-s').textContent = '这次是 ' + lbName;
+  });
 };
-document.getElementById('lb-no').onclick = function () { lbDone('好，那就专心等结果', '想玩的时候随时说「打一把」'); };
-document.getElementById('lb-30').onclick = function (e) { e.preventDefault(); lbDone('好，30 分钟内不再问你', ''); sendPrompt('Little Break：30分钟内别问'); };
-document.getElementById('lb-day').onclick = function (e) { e.preventDefault(); lbDone('好，今天不再问你', ''); sendPrompt('Little Break：今天别问'); };
+$('lb-no').onclick = function () { lbQuiet('好，那就专心等结果', '想玩的时候随时说「打一把」'); };
+$('lb-out').onclick = function (e) { e.preventDefault(); lbOpenPage(); };
+$('lb-30').onclick = function (e) { e.preventDefault(); lbQuiet('好，30 分钟内不再问你', ''); sendPrompt('Little Break：30分钟内别问'); };
+$('lb-day').onclick = function (e) { e.preventDefault(); lbQuiet('好，今天不再问你', ''); sendPrompt('Little Break：今天别问'); };
 </script>
 ```
-
-## 终端里（没有内置浏览器时）
-
-用户说下面这些话时，运行对应命令（脚本不存在就把 https://j-1026.github.io/little-break/ 给用户）：
-
-- 「打一把」→ `bash ~/.little-break/little-break.sh play`
-- 「30分钟内别问」→ `bash ~/.little-break/little-break.sh snooze 30`
-- 「今天别问」→ `bash ~/.little-break/little-break.sh today`
-- 「又可以问了」→ `bash ~/.little-break/little-break.sh resume`
-
-回复一句话确认就够了。下面三节是有内置浏览器时的做法。
 
 ## 用户要玩时
 

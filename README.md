@@ -19,7 +19,7 @@ Little Break 是一个 Claude 技能。你给 Claude 布置一个任务，它开
 - **每个任务开始时问一次**：只在真正需要动手的任务前出现，闲聊不会打扰你。
 - **游戏是随机的**：每次从游戏列表里随机抽一个。现在列表里有两个自己做的篮球小游戏：Swish（单人投篮机，追求完美空刷）和 Halftime（桌面对战篮球机，你对你的 agent），以后会加入更多。
 - **不打扰机制**：卡片上可以选「30 分钟内别问」或「今天别问」。这个设置会被记住，换一个对话也有效。
-- **玩的地方就在 Claude 里**：游戏在 Claude 桌面版的内置浏览器里打开，按 ⌘⇧B（Windows 是 Ctrl+Shift+B）就能调出来。
+- **点一下就开始**：卡片上点「立即开始玩」，游戏直接在对话里的卡片中开始，Claude 在下面照常干活。卡片上还能「换一个」，或者选「30 分钟内别问」「今天别问」。在桌面版里也可以按 ⌘⇧B（Windows 是 Ctrl+Shift+B）在右侧内置浏览器里玩。
 
 ### 安装
 
@@ -103,7 +103,7 @@ Little Break is a Claude skill. When you hand Claude a task and it starts workin
 - **Asks once per task**: only before real work, never during small talk.
 - **Random game**: picks one from the game list each time. Today it has two of my own basketball games: Swish (a single-player shooting machine, chasing the perfect swish) and Halftime (a tabletop dome battle, you vs your agent). More will rotate in.
 - **Don't-disturb options**: the card offers "not for 30 minutes" and "not today". The setting is remembered across conversations.
-- **Plays inside Claude**: the game opens in the Claude desktop app's built-in browser. Press ⌘⇧B (Ctrl+Shift+B on Windows) to bring it up.
+- **One click to play**: press “Play now” on the card and the game starts right inside the card in the chat while Claude keeps working. The card can also swap to another game, or stop asking for 30 minutes or for today. In the desktop app you can also press ⌘⇧B (Ctrl+Shift+B on Windows) to play in the built-in browser pane.
 
 ### Install
 
