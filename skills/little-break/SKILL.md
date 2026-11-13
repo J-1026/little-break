@@ -126,6 +126,17 @@ $('lb-day').onclick = function (e) { e.preventDefault(); lbQuiet('好，今天�
 </script>
 ```
 
+## 终端里（没有内置浏览器时）
+
+用户说下面这些话时，运行对应命令（脚本不存在就把 https://j-1026.github.io/little-break/ 给用户）：
+
+- 「打一把」→ `bash ~/.little-break/little-break.sh play`
+- 「30分钟内别问」→ `bash ~/.little-break/little-break.sh snooze 30`
+- 「今天别问」→ `bash ~/.little-break/little-break.sh today`
+- 「又可以问了」→ `bash ~/.little-break/little-break.sh resume`
+
+回复一句话确认就够了。下面三节是有内置浏览器时的做法。
+
 ## 用户要玩时
 
 找到启动页标签页（没有就用 `preview_start` 打开 https://j-1026.github.io/little-break/），用 `tabs_select` 切到它，再看 `tabs_context` 里面板是不是隐藏的。如果是隐藏的，告诉用户按 ⌘⇧B（Windows 是 Ctrl+Shift+B）调出来。回复一句话就够了。
